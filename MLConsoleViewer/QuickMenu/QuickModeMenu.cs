@@ -146,23 +146,17 @@ namespace MelonViewer.QuickMenu
             documentationButton.localPosition = new Vector3(623, -1111, 0);
             documentationButton.FindChild("Text").GetComponent<Text>().text = "Clear Console";
 
+            var console = consoleTransform.FindChild("_Console/_StatsConsole");
+            console.GetComponent<ScrollRect>().horizontal = true;
+
             var viewport = consoleTransform.FindChild("_Console/_StatsConsole/Viewport");
             viewport.localPosition = Vector3.zeroVector;
             var viewportContent = viewport.FindChild("Content");
             viewportContent.localPosition = Vector3.zeroVector;
-            var fonts = Resources.FindObjectsOfTypeAll<Font>();
-            var font = fonts.First(source => source.name == "Dosis-Regular");
+            viewportContent.GetComponent<ContentSizeFitter>().horizontalFit = ContentSizeFitter.FitMode.MinSize;
+
+            new TextLine(viewportContent);
             
-            var newObj = new GameObject("TestText");
-            newObj.transform.SetParent(viewportContent);
-            newObj.transform.localPosition = Vector3.zeroVector;
-            newObj.transform.localScale = Vector3.one;
-            var newTxt = newObj.AddComponent<Text>();
-            newTxt.font = font;
-            newTxt.fontSize = 50;
-            newTxt.text = "HELLO";
-            newObj.transform.localRotation = Quaternion.Euler(Vector3.zeroVector);
-            newObj.transform.localPosition = Vector3.zeroVector;
             viewportContent.localPosition = Vector3.zeroVector;
             viewport.localPosition = Vector3.zeroVector;
         }
