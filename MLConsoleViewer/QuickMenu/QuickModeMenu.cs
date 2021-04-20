@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using MelonLoader;
 using UnhollowerRuntimeLib;
 using UnityEngine;
@@ -26,7 +28,7 @@ namespace MelonViewer.QuickMenu
             HasInitMenu = true;
         }
 
-        private static (Transform tab, Transform menu) CreateNotificationTab(string name, string text, Color color, string imageDataBase64 = null)
+        private static void CreateNotificationTab(string name, string text, Color color, string imageDataBase64 = null)
         {
             List<GameObject> existingTabs = Resources.FindObjectsOfTypeAll<MonoBehaviourPublicObCoGaCoObCoObCoUnique>()[0].field_Public_ArrayOf_GameObject_0.ToList();
 
@@ -79,12 +81,39 @@ namespace MelonViewer.QuickMenu
             // Allow invite menu to instantiate
             quickModeMenus.Find("QuickModeNotificationsMenu").gameObject.SetActive(true);
             quickModeMenus.Find("QuickModeNotificationsMenu").gameObject.SetActive(false);
-            
-            CopyConsoleScreen(newMenu);
 
-            return (newTab, newMenu);
+            var bundle = AssetBundle.LoadFromMemory(ExtractAb());
+            var menuPrefab = bundle.LoadAsset<GameObject>("MLConsoleViewer");
+            var menuObject = Object.Instantiate(menuPrefab);
+            menuObject.transform.parent = newMenu;
+            menuObject.transform.localPosition = Vector3.zero;
+            menuObject.transform.localScale = Vector3.oneVector;
+            menuObject.transform.localRotation = new Quaternion(0, 0, 0, 1);
+            var textComponent = menuObject.transform.FindChild("Console/TextArea/MLConsole/Viewport/Content").GetComponent<Text>();
+            MainMod.ConsoleLogCache.ForEach(log => textComponent.text = textComponent.text += 
+                MakeNewConsoleLogLine(log.Item1, log.Item2, log.Item3, log.Item4, log.Item5));
+
+            MelonLogger.MsgCallbackHandler -= MainMod.AddLogToCache;
+            MainMod.ConsoleLogCache.Clear();
+            MelonLogger.MsgCallbackHandler += (melonColor, consoleColor, callingMod, logText) =>
+            {
+                textComponent.text = textComponent.text +=
+                    MakeNewConsoleLogLine(melonColor, consoleColor, callingMod, logText);
+            };
         }
 
+        private static byte[] ExtractAb()
+        {
+            var a = Assembly.GetExecutingAssembly();
+            using (var resFilestream = a.GetManifestResourceStream("MelonViewer.MLConsoleViewer"))
+            {
+                if (resFilestream == null) return null;
+                byte[] ba = new byte[resFilestream.Length];
+                resFilestream.Read(ba, 0, ba.Length);
+                return ba;
+            }
+        }
+        
         private static void SetTabIndex(Transform tab, MonoBehaviourPublicObCoGaCoObCoObCoUnique.EnumNPublicSealedvaHoNoPl4vUnique value)
         {
             MonoBehaviour tabDescriptor = tab.GetComponents<MonoBehaviour>().First(c => c.GetIl2CppType().GetMethod("ShowTabContent") != null);
@@ -106,59 +135,17 @@ namespace MelonViewer.QuickMenu
             return s;
         }
 
-        private static void CopyConsoleScreen(Transform newTab)
+
+        private static string MakeNewConsoleLogLine(ConsoleColor melonColor, ConsoleColor txtColor, string callingMod,
+            string logText, DateTime? timeOverride = null)
         {
-            var originalConsole = GameObject.Find("UserInterface/QuickMenu/AvatarStatsMenu");
-            var newConsole = Object.Instantiate(originalConsole, newTab);
-            newConsole.name = "MLConsole";
-            newConsole.transform.localPosition = new Vector3(0, -625, 0);
-            Object.Destroy(newConsole.gameObject.GetComponent<VRCUiAvatarStatsPanel>());
-            Object.Destroy(newConsole.transform.FindChild("Panel").gameObject);
-            
-            DecorateConsole(newConsole.transform);
-            DecorateButtons(newConsole.transform);
-            newConsole.SetActive(true);
+            var newLn = $"\n[<color=green>{MakeTimestamp(timeOverride)}</color>] ";
+            if (!string.IsNullOrWhiteSpace(callingMod))
+                newLn += $"[<color={melonColor.ToString()}>{callingMod}</color>] ";
+            if (!string.IsNullOrWhiteSpace(logText)) newLn += $"<color={txtColor.ToString()}>{logText}</color>";
+            return newLn;
         }
 
-        private static void DecorateConsole(Transform consoleTransform)
-        {
-            var ratingText = consoleTransform.FindChild("_Console/_Header/Text_Rating");
-            var icons = consoleTransform.FindChild("_Console/_Header/_ICONS");
-            var overallText = consoleTransform.FindChild("_Console/_Header/Text_Overall");
-            var icon = consoleTransform.FindChild("_Console/_Header/InfoIcon");
-            
-            Object.Destroy(ratingText.gameObject);
-            Object.Destroy(icons.gameObject);
-
-            overallText.GetComponent<Text>().text = "MelonLoader Console";
-            icon.GetComponent<Image>().sprite = CreateSpriteFromBase64(melonIcon);
-        }
-
-        private static void DecorateButtons(Transform consoleTransform)
-        {
-            var backButton = consoleTransform.FindChild("_Buttons/_BackButton");
-            var documentationButtonText = consoleTransform.FindChild("_Buttons/DocumentationButton/Text (1)");
-            var documentationButton = consoleTransform.FindChild("_Buttons/DocumentationButton");
-            
-            Object.Destroy(backButton.gameObject);
-            Object.Destroy(documentationButtonText.gameObject);
-
-            documentationButton.localPosition = new Vector3(623, -1111, 0);
-            documentationButton.FindChild("Text").GetComponent<Text>().text = "Clear Console";
-
-            var console = consoleTransform.FindChild("_Console/_StatsConsole");
-            console.GetComponent<ScrollRect>().horizontal = true;
-
-            var viewport = consoleTransform.FindChild("_Console/_StatsConsole/Viewport");
-            viewport.localPosition = Vector3.zeroVector;
-            var viewportContent = viewport.FindChild("Content");
-            viewportContent.localPosition = Vector3.zeroVector;
-            viewportContent.GetComponent<ContentSizeFitter>().horizontalFit = ContentSizeFitter.FitMode.MinSize;
-
-            new TextLine(viewportContent);
-            
-            viewportContent.localPosition = Vector3.zeroVector;
-            viewport.localPosition = Vector3.zeroVector;
-        }
+        private static string MakeTimestamp(DateTime? timeOverride = null) => (timeOverride ?? DateTime.Now).AddMilliseconds(-1).ToString("HH:mm:ss.fff");   // More often than not, the log callback is 1ms late
     }
 }
