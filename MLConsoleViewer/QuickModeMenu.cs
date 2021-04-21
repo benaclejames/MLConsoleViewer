@@ -56,6 +56,7 @@ namespace MelonViewer.QuickMenu
             newMenu.anchoredPosition = new Vector2(0, 200f);
             newMenu.gameObject.SetActive(false);
             
+            var newConsole = new InGameConsoleInterface(newMenu, newTab.Find("Badge").gameObject);
 
             // Tab interaction
             var tabButton = newTab.GetComponent<Button>();
@@ -65,6 +66,7 @@ namespace MelonViewer.QuickMenu
                 global::QuickMenu.prop_QuickMenu_0.field_Private_GameObject_6.SetActive(false);
                 global::QuickMenu.prop_QuickMenu_0.field_Private_GameObject_6 = newMenu.gameObject;
                 newMenu.gameObject.SetActive(true);
+                newConsole.NotificationTab.OnTabViewed();
             }));
             
             newTab.transform.FindChild("Badge").gameObject.SetActive(false);
@@ -72,8 +74,6 @@ namespace MelonViewer.QuickMenu
             // Allow invite menu to instantiate
             quickModeMenus.Find("QuickModeNotificationsMenu").gameObject.SetActive(true);
             quickModeMenus.Find("QuickModeNotificationsMenu").gameObject.SetActive(false);
-
-            new InGameConsoleInterface(newMenu);
         }
 
         private static void SetTabIndex(Transform tab, MonoBehaviourPublicObCoGaCoObCoObCoUnique.EnumNPublicSealedvaHoNoPl4vUnique value)

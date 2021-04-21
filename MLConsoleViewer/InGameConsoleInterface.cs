@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using MelonLoader;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,9 +9,13 @@ namespace MelonViewer
         public static InGameConsoleInterface Singleton;
         
         private Text consoleText;
+        public TabBadge NotificationTab;
+        private GameObject menuParentRoot;
 
-        public InGameConsoleInterface(Transform menuCanvasTransform)
+        public InGameConsoleInterface(Transform menuCanvasTransform, GameObject notificationTab)
         {
+            menuParentRoot = menuCanvasTransform.gameObject;
+            
             // Instantiate
             var bundle = AssetBundle.LoadFromMemory(ExtractAb());
             var menuPrefab = bundle.LoadAsset<GameObject>("MLConsoleViewer");
@@ -29,16 +32,20 @@ namespace MelonViewer
             
             // Unload Unused
             bundle.Unload(false);
+            NotificationTab = new TabBadge(notificationTab);
 
             Singleton = this;
             
             MelonConsoleInterface.CatchupAwaitingLogs();
         }
-
+        
         public void AppendConsoleText(MelonLog logLine)
         {
             if (!string.IsNullOrWhiteSpace(consoleText.text)) consoleText.text += "\n";
             consoleText.text += logLine.MakeConsoleString();
+            
+            if (!menuParentRoot.active)
+                NotificationTab.NotifyNewLog(logLine);
         }
 
         private static byte[] ExtractAb()

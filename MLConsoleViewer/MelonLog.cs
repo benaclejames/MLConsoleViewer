@@ -1,11 +1,10 @@
 ﻿using System;
-using MelonLoader;
 
 namespace MelonViewer
 {
     public class MelonLog
     {
-        private MelonLogType logType = MelonLogType.Msg;
+        public MelonLogType logType = MelonLogType.Msg;
         private string modName, logText;
         private ConsoleColor melonColor, txtColor;
         private DateTime logTime = DateTime.Now;
