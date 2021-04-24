@@ -35,8 +35,9 @@ namespace MelonViewer
             NotificationTab = new TabBadge(notificationTab);
 
             Singleton = this;
-            
-            MelonConsoleInterface.CatchupAwaitingLogs();
+
+            foreach (var mod in ModTracker.RegisteredMods)
+                mod.PurgeAwaiting();
         }
         
         public void AppendConsoleText(MelonLog logLine)

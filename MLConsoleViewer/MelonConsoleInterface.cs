@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using MelonLoader;
 
 namespace MelonViewer
@@ -13,8 +12,6 @@ namespace MelonViewer
     
     public static class MelonConsoleInterface
     {
-        public static List<MelonLog> AwaitingLogs = new List<MelonLog>();
-        
         public static void AttachDelegates()
         {
             MelonLogger.MsgCallbackHandler += HandleMelonMsg;
@@ -22,39 +19,22 @@ namespace MelonViewer
             MelonLogger.ErrorCallbackHandler += (s, s1) => HandleWarningOrError(MelonLogType.Error, s, s1);
         }
 
-        public static void CatchupAwaitingLogs()
-        {
-            if (AwaitingLogs.Count <= 0) return;
-            
-            // Log Em
-            foreach (var log in AwaitingLogs)
-                InGameConsoleInterface.Singleton.AppendConsoleText(log);
-                
-            // Clear Em
-            AwaitingLogs.Clear();
-        }
-        
         private static void HandleMelonMsg(ConsoleColor melonColor, ConsoleColor txtColor, string callingMod, string logText)
         {
             if (callingMod != "MLConsoleViewer" || logText == "Hello!")
-                HandleNullOrAppendNewLine(new MelonLog(melonColor, txtColor, callingMod, logText));
+                new MelonLog(melonColor, txtColor, FindOrCreateModTracker(callingMod), logText);
         }
 
         private static void HandleWarningOrError(MelonLogType logType, string callingMod, string logText)
         {
             if (callingMod != "MLConsoleViewer" || logText == "Hello!")
-                HandleNullOrAppendNewLine(new MelonLog(callingMod, logText, logType));
+                new MelonLog(FindOrCreateModTracker(callingMod), logText, logType);
         }
 
-        private static void HandleNullOrAppendNewLine(MelonLog logLine)
+        private static ModTracker FindOrCreateModTracker(string modName)
         {
-            if (InGameConsoleInterface.Singleton == null)
-                AwaitingLogs.Add(logLine);
-            else
-            {
-                CatchupAwaitingLogs();
-                InGameConsoleInterface.Singleton.AppendConsoleText(logLine);
-            }
+            if (modName == string.Empty) return null;
+            return ModTracker.RegisteredMods.Find(mod => mod.ModName == modName) ?? new ModTracker(modName);
         }
     }
 }

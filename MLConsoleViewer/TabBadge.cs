@@ -21,10 +21,10 @@ namespace MelonViewer
 
         public void NotifyNewLog(MelonLog log)
         {
-            if (pendingLogNotifs.ContainsKey(log.logType))
-                pendingLogNotifs[log.logType] += 1;
+            if (pendingLogNotifs.ContainsKey(log.LogType))
+                pendingLogNotifs[log.LogType] += 1;
             else
-                pendingLogNotifs.Add(log.logType, 1);
+                pendingLogNotifs.Add(log.LogType, 1);
 
             if (pendingLogNotifs.ContainsKey(MelonLogType.Error))
             {
