@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,12 +13,11 @@ namespace MelonViewer
         public TabBadge NotificationTab;
         private GameObject menuParentRoot;
 
-        public InGameConsoleInterface(Transform menuCanvasTransform, GameObject notificationTab)
+        public InGameConsoleInterface(Transform menuCanvasTransform, GameObject notificationTab, AssetBundle bundle)
         {
             menuParentRoot = menuCanvasTransform.gameObject;
             
             // Instantiate
-            var bundle = AssetBundle.LoadFromMemory(ExtractAb());
             var menuPrefab = bundle.LoadAsset<GameObject>("MLConsoleViewer");
             var menuObject = Object.Instantiate(menuPrefab);
             
@@ -47,18 +47,6 @@ namespace MelonViewer
             
             if (!menuParentRoot.active)
                 NotificationTab.NotifyNewLog(logLine);
-        }
-
-        private static byte[] ExtractAb()
-        {
-            var a = Assembly.GetExecutingAssembly();
-            using (var resFilestream = a.GetManifestResourceStream("MelonViewer.MLConsoleViewer"))
-            {
-                if (resFilestream == null) return null;
-                var ba = new byte[resFilestream.Length];
-                resFilestream.Read(ba, 0, ba.Length);
-                return ba;
-            }
         }
     }
 }
