@@ -21,14 +21,16 @@ namespace MelonViewer
 
         private static void HandleMelonMsg(ConsoleColor melonColor, ConsoleColor txtColor, string callingMod, string logText)
         {
-            if (callingMod != "MLConsoleViewer" || logText == "Hello!")
-                new MelonLog(melonColor, txtColor, FindOrCreateModTracker(callingMod), logText);
+            if (callingMod == "MLConsoleViewer") return;
+            
+            new MelonLog(melonColor, txtColor, FindOrCreateModTracker(callingMod), logText);
         }
 
         private static void HandleWarningOrError(MelonLogType logType, string callingMod, string logText)
         {
-            if (callingMod != "MLConsoleViewer" || logText == "Hello!")
-                new MelonLog(FindOrCreateModTracker(callingMod), logText, logType);
+            if (callingMod == "MLConsoleViewer") return;
+            
+            new MelonLog(FindOrCreateModTracker(callingMod), logText, logType);
         }
 
         private static ModTracker FindOrCreateModTracker(string modName)

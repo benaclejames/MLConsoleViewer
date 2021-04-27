@@ -4,6 +4,7 @@ using System.Reflection;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 namespace MelonViewer
 {
@@ -23,14 +24,14 @@ namespace MelonViewer
             
             var existingTabs = Resources.FindObjectsOfTypeAll<MonoBehaviourPublicObCoGaCoObCoObCoUnique>()[0].field_Public_ArrayOf_GameObject_0.ToList();
 
-            global::QuickMenu quickMenu = Resources.FindObjectsOfTypeAll<global::QuickMenu>()[0];
+            QuickMenu quickMenu = Resources.FindObjectsOfTypeAll<QuickMenu>()[0];
 
             // Tab
 
             var quickModeTabs = quickMenu.transform.Find("QuickModeTabs").GetComponent<MonoBehaviourPublicObCoGaCoObCoObCoUnique>();
-            var newTab = GameObject.Instantiate(quickModeTabs.transform.Find("NotificationsTab"), quickModeTabs.transform);
+            var newTab = Object.Instantiate(quickModeTabs.transform.Find("NotificationsTab"), quickModeTabs.transform);
             newTab.name = name;
-            GameObject.DestroyImmediate(newTab.GetComponent<MonoBehaviourPublicGaTeSiSiUnique>());
+            Object.DestroyImmediate(newTab.GetComponent<MonoBehaviourPublicGaTeSiSiUnique>());
             SetTabIndex(newTab, (MonoBehaviourPublicObCoGaCoObCoObCoUnique.EnumNPublicSealedvaHoNoPl4vUnique)existingTabs.Count);
             newTab.Find("Badge").GetComponent<RawImage>().color = color;
             newTab.Find("Badge/NotificationsText").GetComponent<Text>().text = text;
@@ -39,7 +40,7 @@ namespace MelonViewer
  
             Resources.FindObjectsOfTypeAll<MonoBehaviourPublicObCoGaCoObCoObCoUnique>()[0].field_Public_ArrayOf_GameObject_0 = existingTabs.ToArray();
             
-            newTab.Find("Icon").GetComponent<Image>().sprite = LoadQMSprite(bundle);
+            newTab.Find("Icon").GetComponent<Image>().sprite = LoadQmSprite(bundle);
 
             // Menu
 
@@ -80,7 +81,7 @@ namespace MelonViewer
         }
 
 
-        private static Sprite LoadQMSprite(AssetBundle bundle)
+        private static Sprite LoadQmSprite(AssetBundle bundle)
         {
             var t = bundle.LoadAsset<Texture2D>("melon");
             var rect = new Rect(0.0f, 0.0f, t.width, t.height);

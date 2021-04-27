@@ -1,7 +1,9 @@
-﻿using MelonLoader;
+﻿using System.Collections;
+using MelonLoader;
 using MelonViewer;
+using UnityEngine;
 
-[assembly: MelonInfo(typeof(MainMod), "MLConsoleViewer", "1.0.0", "benaclejames")]
+[assembly: MelonInfo(typeof(MainMod), "MLConsoleViewer", "1.1.0", "benaclejames")]
 [assembly: MelonGame("VRChat", "VRChat")]
 
 namespace MelonViewer
@@ -14,6 +16,20 @@ namespace MelonViewer
                 QuickModeMenu.InitializeMenu();
         }
 
-        public override void OnApplicationStart() => MelonConsoleInterface.AttachDelegates();
+        public override void OnApplicationStart()
+        {
+            MelonCoroutines.Start(UpdatePendingLogs());
+            MelonConsoleInterface.AttachDelegates();
+        }
+
+        private IEnumerator UpdatePendingLogs()
+        {
+            for (;;)
+            {
+                if (InGameConsoleInterface.Singleton != null)
+                    ModTracker.PurgeAwaiting();
+                yield return new WaitForSeconds(0.1f);
+            }
+        }
     }
 }

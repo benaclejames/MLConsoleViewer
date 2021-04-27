@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-using TMPro;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 namespace MelonViewer
@@ -9,18 +7,19 @@ namespace MelonViewer
     {
         public static InGameConsoleInterface Singleton;
         
-        private Text consoleText;
-        public TabBadge NotificationTab;
-        private GameObject menuParentRoot;
+        private readonly GameObject _consoleTextComponent;
+        public readonly TabBadge NotificationTab;
+        private readonly GameObject _menuParentRoot;
+        private readonly Transform _contentTransform;
 
         public InGameConsoleInterface(Transform menuCanvasTransform, GameObject notificationTab, AssetBundle bundle)
         {
-            menuParentRoot = menuCanvasTransform.gameObject;
+            _menuParentRoot = menuCanvasTransform.gameObject;
             
             // Instantiate
             var menuPrefab = bundle.LoadAsset<GameObject>("MLConsoleViewer");
             var menuObject = Object.Instantiate(menuPrefab);
-            
+
             // Fix Transforms
             menuObject.transform.parent = menuCanvasTransform;
             menuObject.transform.localPosition = Vector3.zero;
@@ -28,24 +27,34 @@ namespace MelonViewer
             menuObject.transform.localRotation = new Quaternion(0, 0, 0, 1);
             
             // Find Components
-            consoleText = menuObject.transform.FindChild("Console/TextArea/MLConsole/Viewport/Content").GetComponent<Text>();
+            _contentTransform = menuObject.transform.Find("Console/TextArea/MLConsole/Viewport/Content");
+            _consoleTextComponent = bundle.LoadAsset<GameObject>("TextElement");
+            _consoleTextComponent.transform.parent = menuObject.transform;
+            _consoleTextComponent.active = false;
             
             // Unload Unused
-            bundle.Unload(false);
             NotificationTab = new TabBadge(notificationTab);
 
             Singleton = this;
-
-            foreach (var mod in ModTracker.RegisteredMods)
-                mod.PurgeAwaiting();
+            
+            
+            ModTracker.PurgeAwaiting();
         }
         
         public void AppendConsoleText(MelonLog logLine)
         {
-            if (!string.IsNullOrWhiteSpace(consoleText.text)) consoleText.text += "\n";
-            consoleText.text += logLine.MakeConsoleString();
+            if (_consoleTextComponent == null) return;
+
+            var newText = Object.Instantiate(_consoleTextComponent);
+            newText.transform.parent = _contentTransform;
+            newText.transform.localPosition = Vector3.zero;
+            newText.transform.localScale = Vector3.oneVector;
+            newText.transform.localRotation = new Quaternion(0, 0, 0, 1);
+            newText.active = true;
             
-            if (!menuParentRoot.active)
+            newText.GetComponent<Text>().text = logLine.MakeConsoleString();
+            
+            if (!_menuParentRoot.active)
                 NotificationTab.NotifyNewLog(logLine);
         }
     }
