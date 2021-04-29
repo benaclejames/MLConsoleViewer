@@ -10,36 +10,37 @@ namespace MelonViewer
 {
     public static class QuickModeMenu
     {
-        public static bool HasInitMenu;
-        
+        public static bool HasInitMenu, IsInstantiating;
+
         public static void InitializeMenu()
         {
-            CreateNotificationTab("MLConsoleViewer", "Text", Color.magenta);
+            if (!IsInstantiating && !HasInitMenu)
+                CreateNotificationTab("MLConsoleViewer", "Text", Color.magenta);
             HasInitMenu = true;
         }
 
         private static void CreateNotificationTab(string name, string text, Color color)
         {
+            IsInstantiating = true;
             var bundle = AssetBundle.LoadFromMemory(ExtractAb());
-            
-            var existingTabs = Resources.FindObjectsOfTypeAll<MonoBehaviourPublicObCoGaCoObCoObCoUnique>()[0].field_Public_ArrayOf_GameObject_0.ToList();
 
-            QuickMenu quickMenu = Resources.FindObjectsOfTypeAll<QuickMenu>()[0];
+            var quickMenu = GameObject.Find("UserInterface/QuickMenu");
 
             // Tab
 
             var quickModeTabs = quickMenu.transform.Find("QuickModeTabs").GetComponent<MonoBehaviourPublicObCoGaCoObCoObCoUnique>();
             var newTab = Object.Instantiate(quickModeTabs.transform.Find("NotificationsTab"), quickModeTabs.transform);
-            newTab.name = name;
+            var existingTabs = quickModeTabs.field_Public_ArrayOf_GameObject_0.ToList();
+
             Object.DestroyImmediate(newTab.GetComponent<MonoBehaviourPublicGaTeSiSiUnique>());
-            SetTabIndex(newTab, (MonoBehaviourPublicObCoGaCoObCoObCoUnique.EnumNPublicSealedvaHoNoPl4vUnique)existingTabs.Count);
+            newTab.name = name;
+            SetTabIndex(newTab, quickModeTabs.field_Public_ArrayOf_GameObject_0.Count);
             newTab.Find("Badge").GetComponent<RawImage>().color = color;
             newTab.Find("Badge/NotificationsText").GetComponent<Text>().text = text;
-
             existingTabs.Add(newTab.gameObject);
  
             Resources.FindObjectsOfTypeAll<MonoBehaviourPublicObCoGaCoObCoObCoUnique>()[0].field_Public_ArrayOf_GameObject_0 = existingTabs.ToArray();
-            
+
             newTab.Find("Icon").GetComponent<Image>().sprite = LoadQmSprite(bundle);
 
             // Menu
@@ -68,16 +69,13 @@ namespace MelonViewer
             }));
             
             newTab.transform.FindChild("Badge").gameObject.SetActive(false);
-
-            // Allow invite menu to instantiate
-            quickModeMenus.Find("QuickModeNotificationsMenu").gameObject.SetActive(true);
-            quickModeMenus.Find("QuickModeNotificationsMenu").gameObject.SetActive(false);
+            IsInstantiating = false;
         }
 
-        private static void SetTabIndex(Transform tab, MonoBehaviourPublicObCoGaCoObCoObCoUnique.EnumNPublicSealedvaHoNoPl4vUnique value)
+        private static void SetTabIndex(Transform tab, int value)
         {
             var tabDescriptor = tab.GetComponents<MonoBehaviour>().First(c => c.GetIl2CppType().GetMethod("ShowTabContent") != null);
-            tabDescriptor.GetIl2CppType().GetFields().First(f => f.FieldType.IsEnum).SetValue(tabDescriptor, new Il2CppSystem.Int32 { m_value = (int)value }.BoxIl2CppObject());
+            tabDescriptor.GetIl2CppType().GetFields().First(f => f.FieldType.IsEnum).SetValue(tabDescriptor, new Il2CppSystem.Int32 { m_value = value }.BoxIl2CppObject());
         }
 
 
