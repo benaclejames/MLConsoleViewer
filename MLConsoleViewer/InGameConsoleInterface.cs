@@ -38,7 +38,7 @@ namespace MelonViewer
             Singleton = this;
             
             
-            ModTracker.PurgeAwaiting();
+            LogTracker.PurgeAwaiting();
         }
         
         public void AppendConsoleText(MelonLog logLine)

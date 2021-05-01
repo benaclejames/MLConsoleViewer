@@ -19,24 +19,18 @@ namespace MelonViewer
             MelonLogger.ErrorCallbackHandler += (s, s1) => HandleWarningOrError(MelonLogType.Error, s, s1);
         }
 
-        private static void HandleMelonMsg(ConsoleColor melonColor, ConsoleColor txtColor, string callingMod, string logText)
+        public static void HandleMelonMsg(ConsoleColor melonColor, ConsoleColor txtColor, string callingMod, string logText)
         {
             if (callingMod == "MLConsoleViewer") return;
             
-            new MelonLog(melonColor, txtColor, FindOrCreateModTracker(callingMod), logText);
+            new MelonLog(melonColor, txtColor, callingMod, logText);
         }
 
-        private static void HandleWarningOrError(MelonLogType logType, string callingMod, string logText)
+        public static void HandleWarningOrError(MelonLogType logType, string callingMod, string logText)
         {
             if (callingMod == "MLConsoleViewer") return;
             
-            new MelonLog(FindOrCreateModTracker(callingMod), logText, logType);
-        }
-
-        private static ModTracker FindOrCreateModTracker(string modName)
-        {
-            if (modName == string.Empty) return null;
-            return ModTracker.RegisteredMods.Find(mod => mod.ModName == modName) ?? new ModTracker(modName);
+            new MelonLog(callingMod, logText, logType);
         }
     }
 }

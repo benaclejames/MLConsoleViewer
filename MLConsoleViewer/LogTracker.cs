@@ -2,19 +2,9 @@
 
 namespace MelonViewer
 {
-    public class ModTracker
+    public static class LogTracker
     {
-        public static readonly List<ModTracker> RegisteredMods = new List<ModTracker>();
         private static readonly List<MelonLog> AwaitingLogs = new List<MelonLog>();
-
-        public readonly string ModName;
-
-        public ModTracker(string modName)
-        {
-            ModName = modName;
-            RegisteredMods.Add(this); 
-        }
-
         public static void OnLog(MelonLog log) => AwaitingLogs.Add(log);
 
         public static void PurgeAwaiting()
