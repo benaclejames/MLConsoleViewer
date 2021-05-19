@@ -27,8 +27,8 @@ namespace MelonViewer
             for (;;)
             {
                 if (InGameConsoleInterface.Singleton != null)
-                    LogTracker.PurgeAwaiting();
-                yield return new WaitForSeconds(0.1f);
+                    LogTracker.PurgeAwaiting(InGameConsoleInterface.Singleton);
+                yield return new WaitForSeconds(0.25f);
             }
         }
     }

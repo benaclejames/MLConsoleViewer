@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 
 namespace MelonViewer
 {
@@ -7,13 +6,14 @@ namespace MelonViewer
     {
         public static InGameConsoleInterface Singleton;
         
-        private readonly GameObject _consoleTextComponent;
         public readonly TabBadge NotificationTab;
         private readonly GameObject _menuParentRoot;
         private readonly Transform _contentTransform;
+        private LogObject _latestLogObject;
 
         public InGameConsoleInterface(Transform menuCanvasTransform, GameObject notificationTab, AssetBundle bundle)
         {
+            Singleton = this;
             _menuParentRoot = menuCanvasTransform.gameObject;
             
             // Instantiate
@@ -28,32 +28,20 @@ namespace MelonViewer
             
             // Find Components
             _contentTransform = menuObject.transform.Find("Console/TextArea/MLConsole/Viewport/Content");
-            _consoleTextComponent = bundle.LoadAsset<GameObject>("TextElement");
-            _consoleTextComponent.transform.parent = menuObject.transform;
-            _consoleTextComponent.active = false;
-            
+            LogObject.ConsoleTextPrefab = bundle.LoadAsset<GameObject>("TextElement");
+            LogObject.ConsoleTextPrefab.transform.parent = menuObject.transform;
+            LogObject.ConsoleTextPrefab.active = false;
+            _latestLogObject = new LogObject(_contentTransform);
+
             // Unload Unused
             NotificationTab = new TabBadge(notificationTab);
-
-            Singleton = this;
-            
-            
-            LogTracker.PurgeAwaiting();
         }
         
         public void AppendConsoleText(MelonLog logLine)
         {
-            if (_consoleTextComponent == null) return;
+            if (_latestLogObject == null || !_latestLogObject.AppendText(logLine))
+                _latestLogObject = new LogObject(_contentTransform);
 
-            var newText = Object.Instantiate(_consoleTextComponent);
-            newText.transform.parent = _contentTransform;
-            newText.transform.localPosition = Vector3.zero;
-            newText.transform.localScale = Vector3.oneVector;
-            newText.transform.localRotation = new Quaternion(0, 0, 0, 1);
-            newText.active = true;
-            
-            newText.GetComponent<Text>().text = logLine.MakeConsoleString();
-            
             if (!_menuParentRoot.active)
                 NotificationTab.NotifyNewLog(logLine);
         }

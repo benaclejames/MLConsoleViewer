@@ -9,6 +9,7 @@ namespace MelonViewer
         private readonly string _logText;
         private readonly ConsoleColor _melonColor, _txtColor;
         private readonly DateTime _logTime = DateTime.Now;
+        public static implicit operator string(MelonLog log) => log.MakeConsoleString();
 
         private static ConsoleColor GetConsoleColorForLogType(MelonLogType logType) =>
             logType == MelonLogType.Warning ? ConsoleColor.Yellow : ConsoleColor.Red;
@@ -20,8 +21,6 @@ namespace MelonViewer
 
             _melonColor = melonColor;
             _txtColor = txtColor;
-            
-            LogTracker.OnLog(this);
         }
 
         public MelonLog(string parentMod, string logText, MelonLogType logType)
@@ -33,11 +32,9 @@ namespace MelonViewer
 
             _melonColor = GetConsoleColorForLogType(logType);
             _txtColor = GetConsoleColorForLogType(logType);
-            
-            LogTracker.OnLog(this);
         }
 
-        public string MakeConsoleString() => LogType == MelonLogType.Msg ? $"[<color=green>{MakeTimestamp(_logTime)}</color>] [<color={_melonColor.ToString()}>{_originatingMod}</color>] <color={_txtColor.ToString()}>{_logText}</color>" : 
+        private string MakeConsoleString() => LogType == MelonLogType.Msg ? $"[<color=green>{MakeTimestamp(_logTime)}</color>] [<color={_melonColor.ToString()}>{_originatingMod}</color>] <color={_txtColor.ToString()}>{_logText}</color>" : 
                 $"<color={GetConsoleColorForLogType(LogType)}>[{MakeTimestamp(_logTime)}] [{_originatingMod}] {_logText}</color>";
 
         private static string MakeTimestamp(DateTime time) => time.AddMilliseconds(-1).ToString("HH:mm:ss.fff");   // More often than not, the log callback is 1ms late

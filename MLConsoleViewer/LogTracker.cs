@@ -7,10 +7,10 @@ namespace MelonViewer
         private static readonly List<MelonLog> AwaitingLogs = new List<MelonLog>();
         public static void OnLog(MelonLog log) => AwaitingLogs.Add(log);
 
-        public static void PurgeAwaiting()
+        public static void PurgeAwaiting(InGameConsoleInterface consoleInterface)
         {
             foreach (var waitingLog in AwaitingLogs)
-                InGameConsoleInterface.Singleton.AppendConsoleText(waitingLog);
+                consoleInterface.AppendConsoleText(waitingLog);
             AwaitingLogs.Clear();
         }
     }
