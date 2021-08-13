@@ -18,10 +18,9 @@ namespace MelonViewer
             
             // Instantiate
             var menuPrefab = bundle.LoadAsset<GameObject>("MLConsoleViewer");
-            var menuObject = Object.Instantiate(menuPrefab);
+            var menuObject = Object.Instantiate(menuPrefab, menuCanvasTransform, true);
 
             // Fix Transforms
-            menuObject.transform.parent = menuCanvasTransform;
             menuObject.transform.localPosition = Vector3.zero;
             menuObject.transform.localScale = Vector3.oneVector;
             menuObject.transform.localRotation = new Quaternion(0, 0, 0, 1);

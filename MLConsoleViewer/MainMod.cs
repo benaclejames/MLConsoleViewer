@@ -3,7 +3,7 @@ using MelonLoader;
 using MelonViewer;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(MainMod), "MLConsoleViewer", "1.1.0", "benaclejames")]
+[assembly: MelonInfo(typeof(MainMod), "MLConsoleViewer", "1.1.1", "benaclejames")]
 [assembly: MelonGame("VRChat", "VRChat")]
 
 namespace MelonViewer
